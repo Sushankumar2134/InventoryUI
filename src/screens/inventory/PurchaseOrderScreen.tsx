@@ -143,84 +143,167 @@ const updatePoItem = (
     setPoItems([{ item_id:null,item_name: "", quantity: "", unit_price: "" }]);
   };
 
-  // const handleSave = () => {
-  //   if (!vendor) {
-  //     Alert.alert("Missing Fields", "Please select a vendor");
-  //     return;
-  //   }
-  //   if (!orderDate) {
-  //     Alert.alert("Missing Fields", "Please enter order date");
-  //     return;
-  //   }
-  //   const hasItems = poItems.some((i) => i.item_name && i.quantity && i.unit_price);
-  //   if (!hasItems) {
-  //     Alert.alert("Missing Fields", "Please add at least one item with quantity and price");
-  //     return;
-  //   }
+//   // const handleSave = () => {
+//   //   if (!vendor) {
+//   //     Alert.alert("Missing Fields", "Please select a vendor");
+//   //     return;
+//   //   }
+//   //   if (!orderDate) {
+//   //     Alert.alert("Missing Fields", "Please enter order date");
+//   //     return;
+//   //   }
+//   //   const hasItems = poItems.some((i) => i.item_name && i.quantity && i.unit_price);
+//   //   if (!hasItems) {
+//   //     Alert.alert("Missing Fields", "Please add at least one item with quantity and price");
+//   //     return;
+//   //   }
 
-  //   const newOrder: PurchaseOrder = {
-  //     id: orders.length + 1,
-  //     po_number: `PO-${String(orders.length + 1).padStart(4, "0")}`,
-  //     vendor_name: vendor,
-  //     order_date: orderDate,
-  //     total_amount: parseFloat(grandTotal),
-  //     status: "Open",
-  //   };
+//   //   const newOrder: PurchaseOrder = {
+//   //     id: orders.length + 1,
+//   //     po_number: `PO-${String(orders.length + 1).padStart(4, "0")}`,
+//   //     vendor_name: vendor,
+//   //     order_date: orderDate,
+//   //     total_amount: parseFloat(grandTotal),
+//   //     status: "Open",
+//   //   };
 
-  //   setOrders([newOrder, ...orders]);
-  //   resetForm();
-  //   setShowForm(false);
-  //   Alert.alert("Success", "Purchase Order created successfully");
-  // };
+//   //   setOrders([newOrder, ...orders]);
+//   //   resetForm();
+//   //   setShowForm(false);
+//   //   Alert.alert("Success", "Purchase Order created successfully");
+//   // };
+// const handleSave = async () => {
+//   console.log("PO Items Full:",JSON.stringify(poItems,null,2));
+//   try {
+//     if (!vendor || !orderDate) {
+//       Alert.alert("Missing Fields", "Vendor and Order Date required");
+//       return;
+//     }
+
+// const validItems = poItems.filter((i) => {
+//   return (
+//     i.item_id !== null &&     // 🔥 REQUIRED
+//     Number(i.quantity) > 0 &&
+//     Number(i.unit_price) > 0
+//   );
+// });
+
+//  if (validItems.length === 0) {
+//       Alert.alert("Missing Fields", "Please add at least one item with Item Name, Quantity, and Unit Price");
+//       return;
+//     }
+// const formatDate = (date: string) => {
+//   if(!date) return null;
+
+//   const parts = date.split("/"); // dd/mm/yyyy
+//   if (parts.length !== 3) return date;
+
+//   // const day = parts[0].padStart(2, "0");
+//   // const month = parts[1].padStart(2, "0");
+//   // const year = parts[2];
+// let month=parts[0].padStart(2,"0");
+// let day=parts[1].padStart(2,"0");
+// let year=parts[2];
+//   return `${year}-${month}-${day}`;
+// };
+//   const payload = {
+//   po_number: `PO-${Date.now()}`,
+//   vendor_id: vendor!.id,
+//   order_date: formatDate(orderDate),
+//   expected_date: deliveryDate ? formatDate(deliveryDate) : null,
+//   total_amount: parseFloat(grandTotal),
+//   items: validItems.map((item) => ({
+//     //item_id: item.item_id || null,
+//     item_id: item.item_id,
+//     item_name: item.item_name,
+//     quantity: Number(item.quantity),
+//     unit_price: Number(item.unit_price),
+//   })),
+// };
+//     console.log("final payload:",JSON.stringify(payload,null,2));
+//     const response = await api.post(
+//       "/inventory/purchase-orders",
+//       payload
+//     );
+
+//     console.log("CREATE PO RESPONSE:", response.data);
+
+//     Alert.alert("Success", "Purchase Order saved to database");
+
+//     resetForm();
+//     setShowForm(false);
+
+//     // 🔥 Refresh list from backend
+//     const data = await getPurchaseOrders();
+//     setOrders(data);
+
+//   } catch (error) {
+//     console.error("Create PO error:", error.response.data);
+//     Alert.alert("Error", "Failed to save purchase order");
+//   }
+// };
+
 const handleSave = async () => {
-  console.log("PO Items Full:",JSON.stringify(poItems,null,2));
+  console.log("PO Items Full:", JSON.stringify(poItems, null, 2));
+
   try {
     if (!vendor || !orderDate) {
       Alert.alert("Missing Fields", "Vendor and Order Date required");
       return;
     }
 
-const validItems = poItems.filter((i) => {
-  return (
-    i.item_name &&
-    i.item_name.trim() !== "" &&
-    Number(i.quantity) > 0 &&
-    Number(i.unit_price) > 0
-  );
-});
+    // 🔥 STRICT VALIDATION (item_id MUST NOT be null)
+    const validItems = poItems.filter((i) => {
+      return (
+        i.item_id !== null &&
+        Number(i.quantity) > 0 &&
+        Number(i.unit_price) > 0
+      );
+    });
 
- if (validItems.length === 0) {
-      Alert.alert("Missing Fields", "Please add at least one item with Item Name, Quantity, and Unit Price");
+    if (validItems.length === 0) {
+      Alert.alert(
+        "Missing Fields",
+        "Please select item, quantity and unit price properly"
+      );
       return;
     }
-const formatDate = (date: string) => {
-  if(!date) return null;
 
-  const parts = date.split("/"); // dd/mm/yyyy
-  if (parts.length !== 3) return date;
+    // 🔥 Extra protection (like Blade required select)
+    if (validItems.some((i) => i.item_id === null)) {
+      Alert.alert("Error", "Please select item properly");
+      return;
+    }
 
-  // const day = parts[0].padStart(2, "0");
-  // const month = parts[1].padStart(2, "0");
-  // const year = parts[2];
-let month=parts[0].padStart(2,"0");
-let day=parts[1].padStart(2,"0");
-let year=parts[2];
-  return `${year}-${month}-${day}`;
-};
-  const payload = {
-  po_number: `PO-${Date.now()}`,
-  vendor_id: vendor!.id,
-  order_date: formatDate(orderDate),
-  expected_date: deliveryDate ? formatDate(deliveryDate) : null,
-  total_amount: parseFloat(grandTotal),
-  items: validItems.map((item) => ({
-    item_id: item.item_id || null,
-    item_name: item.item_name,
-    quantity: Number(item.quantity),
-    unit_price: Number(item.unit_price),
-  })),
-};
-    console.log("final payload:",JSON.stringify(payload,null,2));
+    const formatDate = (date: string) => {
+      if (!date) return null;
+
+      const parts = date.split("/"); // mm/dd/yyyy
+      if (parts.length !== 3) return date;
+
+      let month = parts[0].padStart(2, "0");
+      let day = parts[1].padStart(2, "0");
+      let year = parts[2];
+
+      return `${year}-${month}-${day}`;
+    };
+
+    const payload = {
+      po_number: `PO-${Date.now()}`,
+      vendor_id: vendor!.id,
+      order_date: formatDate(orderDate),
+      expected_date: deliveryDate ? formatDate(deliveryDate) : null,
+      total_amount: parseFloat(grandTotal),
+      items: validItems.map((item) => ({
+        // ✅ FIXED — NO MORE NULL
+        item_id: item.item_id,
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+      })),
+    };
+
+    console.log("final payload:", JSON.stringify(payload, null, 2));
+
     const response = await api.post(
       "/inventory/purchase-orders",
       payload
@@ -233,17 +316,14 @@ let year=parts[2];
     resetForm();
     setShowForm(false);
 
-    // 🔥 Refresh list from backend
     const data = await getPurchaseOrders();
     setOrders(data);
 
-  } catch (error) {
-    console.error("Create PO error:", error.response.data);
+  } catch (error: any) {
+    console.error("Create PO error:", error?.response?.data || error);
     Alert.alert("Error", "Failed to save purchase order");
   }
 };
-
-
 
 
   return (
@@ -439,20 +519,26 @@ let year=parts[2];
     paddingHorizontal: 12,
     borderRadius: 4,
   }}
+  // onPress={() => {
+  //   // If your purchase order has items, pass them here
+  //   navigation.navigate("PurchaseOrderViewScreen", {
+  //     purchaseOrder: {
+  //       poNumber: item.po_number,
+  //       vendor: item.vendor_name,
+  //       orderDate: item.order_date,
+  //       expectedDate: item.expected_date || "-",
+  //       status: item.status,
+  //       totalAmount: item.total_amount,
+  //       items: item.items || [],
+  //     },
+  //   });
+  // }}
+
   onPress={() => {
-    // If your purchase order has items, pass them here
-    navigation.navigate("PurchaseOrderViewScreen", {
-      purchaseOrder: {
-        poNumber: item.po_number,
-        vendor: item.vendor_name,
-        orderDate: item.order_date,
-        expectedDate: item.expected_date || "-",
-        status: item.status,
-        totalAmount: item.total_amount,
-        items: item.items || [],
-      },
-    });
-  }}
+  navigation.navigate("PurchaseOrderViewScreen", {
+    purchaseOrder: item,   // ✅ PASS FULL BACKEND OBJECT
+  });
+}}
 >
   <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 12 }}>
     VIEW
@@ -460,19 +546,50 @@ let year=parts[2];
 </TouchableOpacity>
 
                             
-                            <TouchableOpacity 
+                          
+                          
+                          <TouchableOpacity 
                             style={{ backgroundColor: "#ff9800", 
                             paddingVertical: 6, 
                             paddingHorizontal: 12,
-                             borderRadius: 4 }} onPress={() => {/* TODO: Edit logic */}}>
+                             borderRadius: 4 }} onPress={() => {
+                              navigation.navigate("PurchaseOrderEditScreen", {
+                                purchaseOrder: item,
+                              });
+                            }}>
                               <Text style={{ color: "#fff",
                                 fontWeight: "bold",
-                                 fontSize: 12 }}>EDIT</Text>
+                                 fontSize: 12 }}>Edit</Text>
+                          </TouchableOpacity>
 
+                            <TouchableOpacity style={{ backgroundColor: "#ef4444", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 4 }} onPress={() => {
 
-
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: "#ef4444", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 4 }} onPress={() => {/* TODO: Delete logic */}}>
+                              Alert.alert(
+                                "Confirm Delete",
+                                "Are you sure you want to delete this purchase order?",
+                                [
+                                  {text:"Cancel", style:"cancel"},
+                                  {
+                                    text:"Delete",
+                                    style:"destructive",
+                                    onPress: async () => {
+                                      try {
+                                        await api.delete(`/inventory/purchase-orders/${item.id}`);
+                                        Alert.alert("Deleted", "Purchase order deleted successfully");
+                                        Alert.alert("Deleted", "Purchase order deleted successfully");
+                                        // Refresh list
+                                        const data = await getPurchaseOrders();
+                                        setOrders(data);
+                                      }catch(error:any) 
+                                      {
+                                        console.log(error.response?.data);
+                                        Alert.alert("Error", "Failed to delete purchase order");
+                                      }
+                                    }
+                                  }
+                                ]
+                              );
+                            }}>
                               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 12 }}>DELETE</Text>
                             </TouchableOpacity>
                           </View>
@@ -534,55 +651,71 @@ let year=parts[2];
         </TouchableOpacity>
       </Modal>
 
-      {/* ── Item Select Modal ── */}
-      <Modal visible={showItemModal} transparent animationType="fade">
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowItemModal(false)}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Item</Text>
-              <TouchableOpacity onPress={() => setShowItemModal(false)}>
-                <Ionicons name="close" size={22} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
+      ── Item Select Modal ──
+{/* ── Item Select Modal ── */}
+<Modal
+  visible={showItemModal}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setShowItemModal(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
 
-            
-            {items.map((it: any) => (
-  <TouchableOpacity
-    key={it.id}
-    style={[
-      styles.modalOption,
-      poItems[activeItemIndex]?.item_id === it.id &&
-        styles.modalOptionActive,
-    ]}
-    onPress={() => {
-      updatePoItem(activeItemIndex, "item_id", it.id);
-      updatePoItem(activeItemIndex, "item_name", it.name); // or it.item_name (check DB)
-      setShowItemModal(false);
-    }}
-  >
-    <Text
-      style={[
-        styles.modalOptionText,
-        poItems[activeItemIndex]?.item_id === it.id &&
-          styles.modalOptionTextActive,
-      ]}
-    >
-      {it.name}   {/* or it.item_name */}
-    </Text>
-
-    {poItems[activeItemIndex]?.item_id === it.id && (
-      <Ionicons name="checkmark" size={18} color="#3b82f6" />
-    )}
-  </TouchableOpacity>
-))}
-
-          </View>
+      {/* Header */}
+      <View style={styles.modalHeader}>
+        <Text style={styles.modalTitle}>Select Item</Text>
+        <TouchableOpacity onPress={() => setShowItemModal(false)}>
+          <Ionicons name="close" size={22} color="#6b7280" />
         </TouchableOpacity>
-      </Modal>
+      </View>
+
+      {/* Items List */}
+      <ScrollView>
+        {items.map((it: any) => (
+          <TouchableOpacity
+            key={it.id}
+            style={[
+              styles.modalOption,
+              poItems[activeItemIndex]?.item_id === it.id &&
+                styles.modalOptionActive,
+            ]}
+            onPress={() => {
+              console.log("SELECTED ITEM FULL OBJECT:", it);
+              console.log("SELECTED ITEM ID:", it.id);
+setPoItems(prev => {
+  const updated = [...prev];
+  updated[activeItemIndex] = {
+    ...updated[activeItemIndex],
+    item_id: it.id,
+    item_name: it.name,
+  };
+  return updated;
+});
+
+              setShowItemModal(false);
+            }}
+          >
+            <Text
+              style={[
+                styles.modalOptionText,
+                poItems[activeItemIndex]?.item_id === it.id &&
+                  styles.modalOptionTextActive,
+              ]}
+            >
+              {it.name}
+            </Text>
+
+            {poItems[activeItemIndex]?.item_id === it.id && (
+              <Ionicons name="checkmark" size={18} color="#3b82f6" />
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+    </View>
+  </View>
+</Modal>
     </View>
   );
 };

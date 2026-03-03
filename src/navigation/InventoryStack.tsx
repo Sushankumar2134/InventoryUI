@@ -10,6 +10,9 @@ import AddItemScreen from "../screens/inventory/AddItemScreen";
 import EditInventory from "../screens/inventory/EditInventory";
 import InventoryListScreen from "../screens/inventory/InventoryListScreen";
 import PurchaseOrderViewScreen from "../screens/inventory/PurchaseOrderViewScreen";
+import PurchaseOrderEditScreen from "../screens/inventory/PurchaseOrderEditScreen";
+import CreateGrnScreen from "../screens/inventory/CreateGrnScreen";
+import GrnEntryScreen from "../screens/inventory/GrnEntryScreen";
 
 export type InventoryStackParamList = {
   InventoryDashboardScreen: undefined;
@@ -22,6 +25,9 @@ export type InventoryStackParamList = {
   EditInventory: { item: any };
   InventoryListScreen: undefined;
   PurchaseOrderViewScreen: { purchaseOrder: any };
+  PurchaseOrderEditScreen: { purchaseOrder: any };
+  CreateGrnScreen: undefined;
+  
 };
 
 const Stack = createStackNavigator<InventoryStackParamList>();
@@ -79,7 +85,16 @@ const InventoryStack: React.FC = () => {
   component={PurchaseOrderViewScreen}
   options={{ title: "Purchase Order Details" }}
 />
-
+     <Stack.Screen
+  name="GrnEntryScreen"
+  component={GrnEntryScreen}
+  options={{ title: "Create GRN" }}
+/>
+<Stack.Screen
+  name="CreateGrnScreen"
+  component={CreateGrnScreen}
+  options={{ title: "Create GRN" }}
+/>
     </Stack.Navigator>
   );
 };

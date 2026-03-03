@@ -5,8 +5,11 @@ import TableRow from "../../components/TableRow";
 import EmptyState from "../../components/EmptyState";
 import { getGRNs } from "../../services/inventoryService";
 import type { GRN } from "../../types/inventoryTypes";
+import { useNavigation } from "@react-navigation/native";
+
 
 const GRNScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [grns, setGrns] = useState<GRN[]>([]);
 
@@ -25,7 +28,12 @@ const GRNScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>GRN List</Text>
-       
+       <TouchableOpacity
+    style={styles.primaryBtn}
+    onPress={() => navigation.navigate("CreateGrnScreen")}
+  >
+    <Text style={styles.primaryBtnText}>CREATE GRN</Text>
+  </TouchableOpacity>
       </View>
 
       {loading ? (
@@ -48,9 +56,9 @@ const GRNScreen: React.FC = () => {
                 key={item.id}
                 cells={[
                   { key: "grn", value: item.grn_number, width: 140 },
-                  { key: "po", value: item.po_number, width: 120 },
+                  { key: "po", value: item.purchase_order?.po_number ?? "-" ,width: 120 },
                   { key: "date", value: item.received_date, width: 140 },
-                  { key: "total", value: item.total_amount, width: 120 },
+                  { key: "total", value: `₹ ${item.total_amount}`, width: 120 },
                 ]}
               />
             ))}

@@ -38,6 +38,16 @@ export const getPurchaseOrders = async (): Promise<PurchaseOrder[]> => {
       order_date: po.order_date,
       total_amount: po.total_amount,
       status: po.status,
+
+      items: po.items ?.map((i:any)=>({
+        id: i.id,
+        item_id: i.item_id,
+        item_name: i.item?.name ?? "N/A",
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+        total: i.total,
+      })) ||[],
+
     }));
   } catch (error) {
     console.error("Fetch PO error:", error);

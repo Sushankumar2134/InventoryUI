@@ -1,3 +1,4 @@
+// 
 import React from "react";
 import {
   View,
@@ -5,10 +6,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InventoryStackParamList } from "../../navigation/InventoryStack";
+import api from "../../services/api";
 
 type ViewScreenRouteProp = RouteProp<
   InventoryStackParamList,
@@ -28,10 +31,122 @@ const PurchaseOrderViewScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<ViewScreenNavigationProp>();
   const { purchaseOrder } = route.params;
 
+//   const handleApprove = () => {
+//     Alert.alert(
+//       "Approve Purchase Order",
+//       "Are you sure you want to approve this purchase order?",
+//       [
+//         { text: "Cancel", style: "cancel" },
+//         {
+//           text: "OK",
+//           onPress: async () => {
+//             try {
+//               // Approve in backend
+//               await api.put(
+//                 `/inventory/purchase-orders/${purchaseOrder.id}/approve`
+//               );
+
+//             //   // Fetch updated PO
+//             //   const response = await api.get(
+//             //     `/inventory/purchase-orders/${purchaseOrder.id}`
+//             //   );
+
+//               // Reload details screen
+//               navigation.replace("PurchaseOrderViewScreen", {
+//                 purchaseOrder: response.data,
+//               });
+//             } catch (error) {
+//               Alert.alert("Error", "Approval failed");
+//             }
+//           },
+//         },
+//       ]
+//     );
+//   };
+// const handleApprove = () => {
+//   // If already approved → go directly to GRN
+//   if (purchaseOrder.status === "approved") {
+//     navigation.navigate("CreateGrnScreen", {
+//       purchaseOrder,
+//     });
+//     return;
+//   }
+
+//   Alert.alert(
+//     "Approve Purchase Order",
+//     "Are you sure you want to approve this purchase order?",
+//     [
+//       { text: "Cancel", style: "cancel" },
+//       {
+//         text: "OK",
+//         onPress: async () => {
+//           try {
+//             // Approve PO
+//             await api.put(
+//               `/inventory/purchase-orders/${purchaseOrder.id}/approve`
+//             );
+
+//             // Get updated PO
+//             const response = await api.get(
+//               `/inventory/purchase-orders/${purchaseOrder.id}`
+//             );
+
+//             console.log("Approved PO:", response.data);
+
+//             // Navigate to GRN screen
+//             navigation.navigate("CreateGrnScreen", {
+//               purchaseOrder: response.data,
+//             });
+
+//           } catch (error: any) {
+//             console.log("Approval Error:", error?.response?.data);
+//             Alert.alert("Error", "Approval failed");
+//           }
+//         },
+//       },
+//     ]
+//   );
+// };
+const handleApprove = () => {
+  if (purchaseOrder.status === "approved") {
+    return; // do nothing if already approved
+  }
+
+  Alert.alert(
+    "Approve Purchase Order",
+    "Are you sure you want to approve this purchase order?",
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "OK",
+        onPress: async () => {
+          try {
+            // 1️⃣ Approve in backend
+            await api.put(
+              `/inventory/purchase-orders/${purchaseOrder.id}/approve`
+            );
+
+            // 2️⃣ Fetch updated PO
+            const response = await api.get(
+              `/inventory/purchase-orders/${purchaseOrder.id}`
+            );
+
+            // 3️⃣ Reload SAME screen with updated data
+            navigation.navigate("PurchaseOrderViewScreen", {
+              purchaseOrder: response.data,
+            });
+
+          } catch (error: any) {
+            console.log("Approval Error:", error?.response?.data);
+            Alert.alert("Error", "Approval failed");
+          }
+        },
+      },
+    ]
+  );
+};
   return (
     <ScrollView style={styles.container}>
-      
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Purchase Order Details</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -44,22 +159,22 @@ const PurchaseOrderViewScreen: React.FC<Props> = ({ route }) => {
         <View style={styles.row}>
           <View style={styles.col}>
             <Text style={styles.label}>PO Number:</Text>
-            <Text>{purchaseOrder.poNumber}</Text>
+            <Text>{purchaseOrder.po_number}</Text>
           </View>
           <View style={styles.col}>
             <Text style={styles.label}>Vendor:</Text>
-            <Text>{purchaseOrder.vendor}</Text>
+            <Text>{purchaseOrder.vendor?.vendor_name}</Text>
           </View>
         </View>
 
         <View style={styles.row}>
           <View style={styles.col}>
             <Text style={styles.label}>Order Date:</Text>
-            <Text>{purchaseOrder.orderDate}</Text>
+            <Text>{purchaseOrder.order_date}</Text>
           </View>
           <View style={styles.col}>
             <Text style={styles.label}>Expected Date:</Text>
-            <Text>{purchaseOrder.expectedDate}</Text>
+            <Text>{purchaseOrder.expected_date || "-"}</Text>
           </View>
         </View>
 
@@ -70,12 +185,12 @@ const PurchaseOrderViewScreen: React.FC<Props> = ({ route }) => {
           </View>
           <View style={styles.col}>
             <Text style={styles.label}>Total Amount:</Text>
-            <Text>₹ {purchaseOrder.totalAmount}</Text>
+            <Text>₹ {purchaseOrder.total_amount}</Text>
           </View>
         </View>
       </View>
 
-      {/* Items Section */}
+      {/* Items */}
       <Text style={styles.sectionTitle}>Items</Text>
 
       <View style={styles.tableHeader}>
@@ -86,25 +201,28 @@ const PurchaseOrderViewScreen: React.FC<Props> = ({ route }) => {
         <Text style={styles.cell}>Total</Text>
       </View>
 
-      {purchaseOrder.items.length === 0 ? (
+      {purchaseOrder.items?.length === 0 ? (
         <Text style={{ padding: 10 }}>No Items</Text>
       ) : (
-        purchaseOrder.items.map((item: any, index: number) => (
+        purchaseOrder.items?.map((item: any, index: number) => (
           <View key={index} style={styles.tableRow}>
             <Text style={styles.cell}>{index + 1}</Text>
-            <Text style={styles.cell}>{item.name}</Text>
+            <Text style={styles.cell}>{item.item?.name}</Text>
             <Text style={styles.cell}>{item.quantity}</Text>
-            <Text style={styles.cell}>₹ {item.unitPrice}</Text>
+            <Text style={styles.cell}>₹ {item.unit_price}</Text>
             <Text style={styles.cell}>₹ {item.total}</Text>
           </View>
         ))
       )}
 
-      {/* Approve Button */}
-      <TouchableOpacity style={styles.approveBtn}>
-        <Text style={styles.approveText}>APPROVE PURCHASE ORDER</Text>
-      </TouchableOpacity>
-
+      {/* BUTTON LOGIC (UNCHANGED) */}
+          
+<TouchableOpacity style={styles.approveBtn} 
+onPress={handleApprove}>
+  <Text style={styles.approveText}>
+ APPROVE PURCHASE ORDER
+  </Text>
+</TouchableOpacity>
     </ScrollView>
   );
 };
@@ -171,7 +289,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   approveBtn: {
-    backgroundColor: "#16a34a",
+    backgroundColor: "#e81167ed",
     padding: 14,
     marginTop: 20,
     borderRadius: 8,

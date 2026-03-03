@@ -17,6 +17,10 @@ import StockTransferScreen from "../screens/inventory/StockTransferScreen";
 import StockAuditScreen from "../screens/inventory/StockAuditScreen";
 import ReportsScreen from "../screens/inventory/ReportsScreen";
 import {RootStackParamList} from './types';
+import PurchaseOrderEditScreen from '../screens/inventory/PurchaseOrderEditScreen';
+import CreateGrnScreen from '../screens/inventory/CreateGrnScreen';
+import GrnEntryScreen from '../screens/inventory/GrnEntryScreen';
+
 const Stack = createStackNavigator<RootStackParamList & Record<string, any>>();
 
 export default () => {
@@ -35,7 +39,17 @@ export default () => {
         component={AddItemScreen}
         options={{ title: "Add Item" }}
       />
+       <Stack.Screen
+        name="CreateGrnScreen"
+        component={CreateGrnScreen}
+        options={{ title: "Create GRN" }}
+         />
 
+        <Stack.Screen
+         name="GrnEntryScreen"
+          component={GrnEntryScreen}
+          options={{ title: "Create GRN Entry" }}
+          /> 
       <Stack.Screen
         name="EditInventory"
         component={EditInventory}
@@ -59,7 +73,11 @@ export default () => {
         component={PurchaseOrderViewScreen}
         options={{ title: "Purchase Order Details" }}
       />
-
+       <Stack.Screen
+  name="PurchaseOrderEditScreen"
+  component={PurchaseOrderEditScreen}
+  options={{ title: "Edit Purchase Order" }}
+/>
       <Stack.Screen
         name="GRNScreen"
         component={GRNScreen}

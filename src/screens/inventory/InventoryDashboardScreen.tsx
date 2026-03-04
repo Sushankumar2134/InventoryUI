@@ -6,6 +6,7 @@ import DashboardCard from "../../components/DashboardCard";
 import { useTheme } from "../../hooks";
 import { Block, Text } from "../../components";
 import type { RootStackParamList } from "../../navigation/types";
+import { Background } from "@react-navigation/elements";
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -26,12 +27,14 @@ const InventoryDashboardScreen: React.FC = () => {
         </Text>
       </Block>
 
-      <View style={styles.grid}>
+      <View style={[styles.grid ]}>
         <View style={styles.row}>
           <DashboardCard
+            
             title="Add Item"
             iconName="add-circle"
             onPress={() => navigation.navigate("AddItemScreen")}
+           
           />
           <DashboardCard
             title="Purchase Orders"
@@ -73,16 +76,23 @@ export default InventoryDashboardScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f8089c" ,
+    color: "#f90ea3",
   },
   content: {
     paddingTop: 16,
     paddingBottom: 24,
+    
   },
   grid: {
     flex: 1,
     paddingHorizontal: 14,
+    
+    
   },
   row: {
     flexDirection: "row",
+    
+    
   },
 });

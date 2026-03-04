@@ -1,5 +1,5 @@
-// 
-import React from "react";
+
+import React,{useEffect,} from "react";
 import {
   View,
   Text,
@@ -12,6 +12,9 @@ import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InventoryStackParamList } from "../../navigation/InventoryStack";
 import api from "../../services/api";
+import PurchaseOrderEditScreen from "./PurchaseOrderEditScreen";
+
+
 
 type ViewScreenRouteProp = RouteProp<
   InventoryStackParamList,
@@ -216,13 +219,32 @@ const handleApprove = () => {
       )}
 
       {/* BUTTON LOGIC (UNCHANGED) */}
-          
-<TouchableOpacity style={styles.approveBtn} 
-onPress={handleApprove}>
-  <Text style={styles.approveText}>
- APPROVE PURCHASE ORDER
-  </Text>
-</TouchableOpacity>
+         
+{purchaseOrder.status !== "approved" ? (
+
+  // Approve Button (Visible only if NOT approved)
+  <TouchableOpacity
+    style={styles.approveBtn}
+    onPress={handleApprove}
+  >
+    <Text style={styles.approveText}>
+      APPROVE PURCHASE ORDER
+    </Text>
+  </TouchableOpacity>
+
+) : (
+
+  // Approved State (Disabled)
+  <TouchableOpacity
+    style={[styles.approveBtn, { backgroundColor: "#16a34a" }]}
+    disabled
+  >
+    <Text style={styles.approveText}>
+      APPROVED
+    </Text>
+  </TouchableOpacity>
+
+)}
     </ScrollView>
   );
 };

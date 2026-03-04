@@ -19,6 +19,7 @@ import type { PurchaseOrder } from "../../types/inventoryTypes";
 import api from "../../services/api";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InventoryStackParamList } from "../../navigation/InventoryStack";
+import {MaterialIcons} from '@expo/vector-icons';
 
 type NavigationProp = StackNavigationProp<
   InventoryStackParamList,
@@ -311,7 +312,7 @@ const handleSave = async () => {
 
     console.log("CREATE PO RESPONSE:", response.data);
 
-    Alert.alert("Success", "Purchase Order saved to database");
+    Alert.alert("Success", "Purchase Order saved ");
 
     resetForm();
     setShowForm(false);
@@ -512,43 +513,21 @@ const handleSave = async () => {
                           <View style={{ flexDirection: "row", gap: 6, justifyContent: "center" }}>
 
 
-                           <TouchableOpacity
-  style={{
-    backgroundColor: "#10b981",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-  }}
-  // onPress={() => {
-  //   // If your purchase order has items, pass them here
-  //   navigation.navigate("PurchaseOrderViewScreen", {
-  //     purchaseOrder: {
-  //       poNumber: item.po_number,
-  //       vendor: item.vendor_name,
-  //       orderDate: item.order_date,
-  //       expectedDate: item.expected_date || "-",
-  //       status: item.status,
-  //       totalAmount: item.total_amount,
-  //       items: item.items || [],
-  //     },
-  //   });
-  // }}
-
+<TouchableOpacity
+style={styles.viewBtn}
   onPress={() => {
   navigation.navigate("PurchaseOrderViewScreen", {
     purchaseOrder: item,   // ✅ PASS FULL BACKEND OBJECT
   });
 }}
 >
-  <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 12 }}>
-    VIEW
-  </Text>
+  <Ionicons name="eye-outline" size={14} color="#3b82f6" />
 </TouchableOpacity>
 
                             
                           
                           
-                          <TouchableOpacity 
+                           {/* <TouchableOpacity 
                             style={{ backgroundColor: "#ff9800", 
                             paddingVertical: 6, 
                             paddingHorizontal: 12,
@@ -560,9 +539,40 @@ const handleSave = async () => {
                               <Text style={{ color: "#fff",
                                 fontWeight: "bold",
                                  fontSize: 12 }}>Edit</Text>
-                          </TouchableOpacity>
+                          </TouchableOpacity>  */}
 
-                            <TouchableOpacity style={{ backgroundColor: "#ef4444", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 4 }} onPress={() => {
+
+{item.status === "approved" ? (
+
+  // Disabled Edit (Grey)
+  <TouchableOpacity
+    style={styles.editBtn}
+    onPress={() =>
+      Alert.alert(
+        "Edit Not Allowed",
+        "Approved purchase orders cannot be edited."
+      )
+    }
+  >
+    <Ionicons name="create-outline" size={18} color="#9ca3af" />
+  </TouchableOpacity>
+
+) : (
+
+  // Normal Edit
+  <TouchableOpacity
+    style={styles.editBtn}
+    onPress={() =>
+      navigation.navigate("PurchaseOrderEditScreen", {
+        purchaseOrder: item,
+      })
+    }
+  >
+    <Ionicons name="create-outline" size={18} color="#2563eb" />
+  </TouchableOpacity>
+
+)}
+<TouchableOpacity style={ styles.deleteBtn} onPress={() => {
 
                               Alert.alert(
                                 "Confirm Delete",
@@ -590,7 +600,7 @@ const handleSave = async () => {
                                 ]
                               );
                             }}>
-                              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 12 }}>DELETE</Text>
+                               <Ionicons name="trash-outline" size={14} color="#ef4444" />
                             </TouchableOpacity>
                           </View>
                         ),
@@ -966,6 +976,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
+  viewBtn: {
+    width: 28,
+    height: 28, 
+    borderRadius: 6,
+    backgroundColor: "#e0e7ff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+editBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#eff6ff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+deleteBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#fef2f2",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   /* Modal */
   modalOverlay: {
     flex: 1,

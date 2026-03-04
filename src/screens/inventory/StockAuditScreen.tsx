@@ -55,11 +55,7 @@ const StockAuditScreen: React.FC = () => {
   const [audits, setAudits] = useState<AuditRecord[]>([]);
 const [items,setItems]=useState<AuditItem[]>([]);
 
-
-
-
-
-  useEffect(() => {
+useEffect(() => {
     loadAudits();
     loadItems();
   }, []);

@@ -51,6 +51,8 @@ const InventoryDashboardScreen: React.FC = () => {
           <DashboardCard
             title="Stock Transfer"
             iconName="swap-horizontal"
+            
+           
             onPress={() => navigation.navigate("StockTransferScreen")}
           />
         </View>

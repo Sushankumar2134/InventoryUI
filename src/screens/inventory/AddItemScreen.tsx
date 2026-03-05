@@ -11,10 +11,11 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons,MaterialIcons } from "@expo/vector-icons";
 import TableHeader from "../../components/TableHeader";
 import TableRow from "../../components/TableRow";
 import EmptyState from "../../components/EmptyState";
+import { useTheme } from "@react-navigation/native";
 // import api from ". ./. ./services/api"; 
 // import { useEffect } from "react";
 
@@ -39,18 +40,14 @@ interface InventoryItem {
 const AddItemScreen: React.FC = ({ navigation }: any) => {
   const [showForm, setShowForm] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-
+  const { colors } = useTheme();
   const [items, setItems] = useState<InventoryItem[]>([
     // {
     //   id: 1,
     //   name: "Paracetamol",
     //   code: "MED001",
     //   category: "Medicine",
-    //   unit: "Tablets",
-    //   stock: 150,
-    //   reorder_level: 50,
-    //   status: "active",
-    // },
+  
     // {
     //   id: 2,
     //   name: "Surgical Gloves",
@@ -120,7 +117,18 @@ console.log("ADD SCREEN RESPONSE:", response.data);
     stock: "0",
   });
 
-  const categories = ["Medicine", "Equipment", "Consumable", "Surgical", "Lab"];
+  // const categories = ["Medicine", "Equipment", "Consumable", "Surgical", "Lab","others"];
+const [newCategory, setNewCategory] = useState("");
+const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+
+const [categories, setCategories] = useState<string[]>([
+  "Medicine",
+  "Equipment",
+  "Consumable",
+  "Others",
+]);
+const otherOptions="Others";
+
 
   const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
@@ -441,17 +449,13 @@ const handleDelete = (id: number) => {
                         render: () => (
                           <View style={styles.actionsCell}>
                             <TouchableOpacity
-                              style={styles.editBtn}
-                              onPress={() => navigation.navigate("EditInventory", { item })}
-                            >
-                              <Ionicons name="create-outline" size={14} color="#3b82f6" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.deleteBtn}
-                              onPress={() => handleDelete(item.id)}
-                            >
-                              <Ionicons name="trash-outline" size={14} color="#ef4444" />
-                            </TouchableOpacity>
+                style={{marginRight: 12}}
+                onPress={() => navigation.navigate("EditInventory", { item })}>
+                <MaterialIcons name="edit" size={20} color={colors.primary} />
+              </TouchableOpacity>
+                            <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                <MaterialIcons name="delete" size={20} color={colors.primary} />
+              </TouchableOpacity>
                           </View>
                         ),
                       },
@@ -483,10 +487,15 @@ const handleDelete = (id: number) => {
                   style={[
                     styles.modalOption,
                     form.category === cat && styles.modalOptionActive,
+                    
                   ]}
                   onPress={() => {
+                    if (cat === "Others") {
+                      setShowNewCategoryInput(true);
+                    }else{
                     handleChange("category", cat);
                     setShowCategoryModal(false);
+                    }
                   }}
                 >
                   <Text
@@ -502,6 +511,42 @@ const handleDelete = (id: number) => {
                   )}
                 </TouchableOpacity>
               ))}
+              {showNewCategoryInput && (
+  <View style={{ padding: 15 }}>
+    <TextInput
+      placeholder="Enter new category"
+      style={styles.input}
+      value={newCategory}
+      onChangeText={setNewCategory}
+    />
+
+    <TouchableOpacity
+      style={styles.saveBtn}
+      
+      
+      onPress={() => {
+
+        if (!newCategory.trim()) {
+          Alert.alert("Validation", "Enter category name");
+          return;
+        }
+
+        // add category to dropdown
+        setCategories([...categories, newCategory]);
+
+        // select that category
+        handleChange("category", newCategory);
+
+        // reset
+        setNewCategory("");
+        setShowNewCategoryInput(false);
+        setShowCategoryModal(false);
+      }}
+    ><Text style={[ styles.saveBtnText]}>Save Category</Text>
+                  {/* <Text style={styles.saveBtnText}>Add Category</Text> */}
+    </TouchableOpacity>
+  </View>
+)}
             </View>
           </View>
         </Modal>
@@ -618,10 +663,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: "center",
   },
+   saveBtn2: {
+    //flex: 1,
+    //backgroundColor: "#11010f",
+   // paddingVertical: 12,
+    //borderRadius: 6,
+    alignItems: "center",
+    color:"#11010f",
+    flex:0,
+  },
   saveBtnText: {
     color: "#fff",
     fontWeight: "700",
     fontSize: 13,
+    
   },
   cancelBtn: {
     paddingVertical: 12,

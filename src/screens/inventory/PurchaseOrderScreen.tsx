@@ -20,6 +20,7 @@ import api from "../../services/api";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InventoryStackParamList } from "../../navigation/InventoryStack";
 import {MaterialIcons} from '@expo/vector-icons';
+import { useTheme } from "../../hooks"; 
 
 type NavigationProp = StackNavigationProp<
   InventoryStackParamList,
@@ -44,6 +45,7 @@ interface POItem {
 const PurchaseOrderScreen: React.FC = () => {
 
 const navigation = useNavigation<NavigationProp>();
+const { colors } = useTheme();
 
   const [vendors,setvendors]=useState<{id:number,vendor_name:string}[]>([]);
   const [items,setItems]=useState<any[]>([]);
@@ -514,14 +516,14 @@ const handleSave = async () => {
 
 
 <TouchableOpacity
-style={styles.viewBtn}
+style={{ backgroundColor: colors.white, padding: 6, borderRadius: 4 }}
   onPress={() => {
   navigation.navigate("PurchaseOrderViewScreen", {
     purchaseOrder: item,   // ✅ PASS FULL BACKEND OBJECT
   });
 }}
 >
-  <Ionicons name="eye-outline" size={14} color="#3b82f6" />
+  <Ionicons name="eye-outline" size={14} color={colors.primary} />
 </TouchableOpacity>
 
                             
@@ -546,7 +548,7 @@ style={styles.viewBtn}
 
   // Disabled Edit (Grey)
   <TouchableOpacity
-    style={styles.editBtn}
+    // style={styles.editBtn}
     onPress={() =>
       Alert.alert(
         "Edit Not Allowed",
@@ -554,55 +556,55 @@ style={styles.viewBtn}
       )
     }
   >
-    <Ionicons name="create-outline" size={18} color="#9ca3af" />
+ <MaterialIcons name="edit" size={20} color={colors.primary} />
   </TouchableOpacity>
 
 ) : (
 
   // Normal Edit
-  <TouchableOpacity
-    style={styles.editBtn}
-    onPress={() =>
-      navigation.navigate("PurchaseOrderEditScreen", {
-        purchaseOrder: item,
-      })
-    }
-  >
-    <Ionicons name="create-outline" size={18} color="#2563eb" />
-  </TouchableOpacity>
-
-)}
-<TouchableOpacity style={ styles.deleteBtn} onPress={() => {
-
-                              Alert.alert(
-                                "Confirm Delete",
-                                "Are you sure you want to delete this purchase order?",
-                                [
-                                  {text:"Cancel", style:"cancel"},
-                                  {
-                                    text:"Delete",
-                                    style:"destructive",
-                                    onPress: async () => {
-                                      try {
-                                        await api.delete(`/inventory/purchase-orders/${item.id}`);
-                                        Alert.alert("Deleted", "Purchase order deleted successfully");
-                                        Alert.alert("Deleted", "Purchase order deleted successfully");
-                                        // Refresh list
-                                        const data = await getPurchaseOrders();
-                                        setOrders(data);
-                                      }catch(error:any) 
-                                      {
-                                        console.log(error.response?.data);
-                                        Alert.alert("Error", "Failed to delete purchase order");
-                                      }
-                                    }
-                                  }
-                                ]
-                              );
+<TouchableOpacity
+                style={{marginRight: 12}}
+                 onPress={() => {
+                              navigation.navigate("PurchaseOrderEditScreen", {
+                                purchaseOrder: item,
+                              });
                             }}>
-                               <Ionicons name="trash-outline" size={14} color="#ef4444" />
-                            </TouchableOpacity>
-                          </View>
+                <MaterialIcons name="edit" size={20} color={colors.primary} />
+              </TouchableOpacity>
+)}
+<TouchableOpacity
+
+  onPress={() => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this purchase order?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.delete(`/inventory/purchase-orders/${item.id}`);
+              Alert.alert("Deleted", "Purchase order deleted successfully");
+
+              const data = await getPurchaseOrders();
+              setOrders(data);
+
+            } catch (error: any) {
+              console.log(error?.response?.data);
+              Alert.alert("Error", "Failed to delete purchase order");
+            }
+          }
+        }
+      ]
+    );
+  }}
+>
+   <MaterialIcons name="delete" size={20} color={colors.danger} />
+</TouchableOpacity>         
+
+</View>
                         ),
                         width: 220,
                         align: "center",
